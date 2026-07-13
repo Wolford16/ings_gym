@@ -1,0 +1,103 @@
+/* ─── ESTILOS Y ANIMACIONES GLOBALES PERSONALIZADAS ─── */
+/* Este archivo contiene las animaciones y reglas CSS personalizadas que */
+/* figma-generated inyectaba anteriormente de forma dinámica en App.tsx. */
+
+/* Animación de parpadeo suave para luces de neón */
+@keyframes neonPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* Animación de flotación oscilante para etiquetas decorativas de grafiti */
+@keyframes floatTag {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(-1deg); }
+}
+
+/* Animación de barrido hacia abajo para efectos de luz */
+@keyframes scanDown {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Animación de escurrimiento de pintura */
+@keyframes dripDown {
+  0% { height: 0; opacity: 0.9; }
+  100% { height: 70px; opacity: 0.4; }
+}
+
+/* Efecto de brillo metálico */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Animación de revelado progresivo de izquierda a derecha */
+@keyframes revealLeft {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0% 0 0); }
+}
+
+/* Animación de difuminado y escala para simular aplicación de aerosol */
+@keyframes sprayIn {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/* Clases de utilidad para aplicar animaciones */
+.neon-pulse {
+  animation: neonPulse 2.5s ease-in-out infinite;
+}
+
+.float-tag {
+  animation: floatTag 4s ease-in-out infinite;
+}
+
+/* Tarjeta con efecto de brillo metálico en hover */
+.shimmer-card:hover {
+  background-size: 200% 100%;
+  animation: shimmer 0.7s linear;
+}
+
+/* Efecto de escala suavizada para interacciones con spray */
+.spray-hover {
+  transition: all 0.35s cubic-bezier(0.22, 0.68, 0, 1.2);
+}
+
+.spray-hover:hover {
+  transform: scale(1.04);
+}
+
+/* Estilos personalizados enfocados en inputs y textarea */
+input:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #ff1500 !important; /* Rojo neón */
+  box-shadow: 0 0 12px rgba(255, 21, 0, 0.31) !important;
+}
+
+/* Desplazamiento suave para la navegación interna */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Personalización de la barra de desplazamiento (Scrollbar) */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808; /* Fondo muy oscuro */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 21, 0, 0.38); /* Rojo neón transparente */
+}
