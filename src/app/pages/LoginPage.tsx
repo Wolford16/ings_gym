@@ -1,7 +1,71 @@
-import { Link } from "react-router";
-import { R, O, FD, FG, FB, FM, tg, bg } from "../components/common/styleConstants";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../../contexts/AuthContext";
+import { R, O, FD, FB, FM, tg, bg } from "../components/common/styleConstants";
 
+/**
+ * Página de inicio de sesión funcional.
+ * Conecta con Firebase Auth a través del AuthContext.
+ * Redirige según el rol del usuario y el flag de cambio de contraseña.
+ */
 export default function LoginPage() {
+  const { iniciarSesion } = useAuth();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
+
+  // ── Mapeo de códigos de error de Firebase a español ───
+
+  function traducirError(code: string): string {
+    const errores: Record<string, string> = {
+      "auth/invalid-email": "El correo electrónico no es válido.",
+      "auth/user-disabled": "Esta cuenta ha sido desactivada.",
+      "auth/user-not-found": "No existe una cuenta con este correo.",
+      "auth/wrong-password": "La contraseña es incorrecta.",
+      "auth/invalid-credential": "Credenciales inválidas. Verifica tu correo y contraseña.",
+      "auth/too-many-requests":
+        "Demasiados intentos fallidos. Espera un momento antes de reintentar.",
+    };
+    return errores[code] || "Error al iniciar sesión. Intenta de nuevo.";
+  }
+
+  // ── Submit ────────────────────────────────────────────
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setCargando(true);
+
+    try {
+      const datosUsuario = await iniciarSesion(email, password);
+
+      // Si requiere cambio de contraseña → redirigir al formulario obligatorio
+      if (datosUsuario.requiereCambioContrasena) {
+        navigate("/cambio-contrasena", { replace: true });
+        return;
+      }
+
+      // Redirigir al dashboard que corresponda según el rol
+      const rutaPorRol: Record<string, string> = {
+        usuario: "/dashboard/usuario",
+        recepcionista: "/dashboard/recepcionista",
+        entrenador: "/dashboard/entrenador",
+        administrador: "/dashboard/administrador",
+      };
+
+      const destino = rutaPorRol[datosUsuario.rol] || "/dashboard";
+      navigate(destino, { replace: true });
+    } catch (err: any) {
+      const codigo = err.code || "";
+      setError(err.message || traducirError(codigo));
+    } finally {
+      setCargando(false);
+    }
+  }
+
   return (
     <div
       className="min-h-screen flex items-center justify-center relative px-5 overflow-hidden"
@@ -47,8 +111,23 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Formulario (Campos estéticos funcionales en el cliente) */}
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        {/* Mensaje de error */}
+        {error && (
+          <div
+            className="mb-6 px-4 py-3 rounded-lg border text-sm"
+            style={{
+              background: `${R}10`,
+              borderColor: `${R}40`,
+              color: R,
+              fontFamily: FB,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Formulario */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
               className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-bold"
@@ -58,6 +137,8 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="nombre@ingsgym.com"
               className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
               style={{
@@ -68,6 +149,7 @@ export default function LoginPage() {
                 fontSize: "1rem",
               }}
               required
+              disabled={cargando}
             />
           </div>
 
@@ -80,6 +162,8 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
               style={{
@@ -90,13 +174,15 @@ export default function LoginPage() {
                 fontSize: "1rem",
               }}
               required
+              disabled={cargando}
             />
           </div>
 
           {/* Botón de Acceso */}
           <button
             type="submit"
-            className="w-full py-3.5 text-base font-black uppercase tracking-widest text-center cursor-pointer transition-all hover:brightness-110 active:scale-[0.99]"
+            disabled={cargando}
+            className="w-full py-3.5 text-base font-black uppercase tracking-widest text-center cursor-pointer transition-all hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               fontFamily: FD,
               background: R,
@@ -105,7 +191,7 @@ export default function LoginPage() {
               ...bg(R, 0.75),
             }}
           >
-            ENTRAR
+            {cargando ? "VERIFICANDO..." : "ENTRAR"}
           </button>
         </form>
 

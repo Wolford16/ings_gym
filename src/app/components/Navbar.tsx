@@ -11,17 +11,17 @@ import { R, FD, FB, tg, bg } from "./common/styleConstants";
 export default function Navbar() {
   // Estado para controlar si el menú móvil está abierto
   const [open, setOpen] = useState(false);
-  
+
   // Estado para controlar si el usuario ha hecho scroll hacia abajo
   const [sc, setSc] = useState(false);
 
   useEffect(() => {
     // Función que evalúa la posición del scroll vertical
     const handleScroll = () => setSc(window.scrollY > 55);
-    
+
     // Escucha el evento de scroll en la ventana global
     window.addEventListener("scroll", handleScroll);
-    
+
     // Limpieza al desmontar el componente
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -136,6 +136,7 @@ export default function Navbar() {
           {/* Botón de unirse en el menú móvil */}
           <a
             href="#membresias"
+            className="text-base font-black uppercase tracking-widest px-6 py-3 text-center"
             className="text-base font-black uppercase tracking-widest px-6 py-3 text-center mb-2"
             style={{
               fontFamily: FD,

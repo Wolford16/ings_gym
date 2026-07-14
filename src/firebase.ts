@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Agregamos (import.meta as any).env para quitar todos los errores de TypeScript
 const env = (import.meta as any).env;
@@ -22,3 +23,4 @@ const app = initializeApp(firebaseConfig);
 // Inicializar y exportar servicios
 export const analytics = getAnalytics(app);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
