@@ -22,7 +22,7 @@ import {
 import { FD, FB, FM, R, G, Y, O, bg, tg } from "../../components/common/styleConstants";
 
 export default function UserDashboard() {
-  const { usuario, datosUsuario } = useAuth();
+  const { usuario, datosUsuario, cargando } = useAuth();
 
   // Navegación interna del dashboard de usuario
   const [seccionInterna, setSeccionInterna] = useState<"clases" | "pagos" | "tickets">("clases");
@@ -198,6 +198,17 @@ export default function UserDashboard() {
     } finally {
       setGuardandoTicket(false);
     }
+  }
+
+  if (cargando || !datosUsuario) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: "#060606" }}>
+        <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: `${R}40`, borderTopColor: R }} />
+        <span className="text-xs uppercase tracking-widest text-zinc-500 font-mono" style={{ fontFamily: FM }}>
+          Cargando perfil de cliente...
+        </span>
+      </div>
+    );
   }
 
   // Cálculos de membresía
