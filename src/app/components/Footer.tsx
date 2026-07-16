@@ -21,10 +21,10 @@ export default function Footer() {
       <BrickBg opacity={0.025} />
 
       <div className="relative z-10 max-w-7xl mx-auto px-5">
-        
+
         {/* Rejilla de tres columnas en escritorio */}
         <div className="grid md:grid-cols-3 gap-10 mb-10">
-          
+
           {/* Columna 1: Marca y Filosofía */}
           <div>
             <div
@@ -34,7 +34,7 @@ export default function Footer() {
               <span style={{ color: R }}>INGS</span>
               <span className="text-white"> GYM</span>
             </div>
-            
+
             {/* Tag de estilo grafiti flotante (.float-tag) */}
             <div
               className="float-tag inline-block text-lg mb-4"
@@ -42,7 +42,7 @@ export default function Footer() {
             >
               Underground Fitness
             </div>
-            
+
             <p className="text-gray-600 text-sm leading-relaxed" style={{ fontFamily: FB }}>
               Nacidos en la calle. Forjados en el esfuerzo. La comunidad underground más auténtica del barrio.
             </p>
@@ -80,11 +80,11 @@ export default function Footer() {
               >
                 Acceder (Intranet)
               </Link>
-            </div>
-          </div>
+            </div >
+          </div >
 
           {/* Columna 3: Manifiesto y CTA */}
-          <div className="flex flex-col justify-between">
+          < div className="flex flex-col justify-between" >
             <div>
               <div
                 className="text-xs uppercase tracking-widest text-gray-700 mb-4"
@@ -101,7 +101,7 @@ export default function Footer() {
                 SOLO TRABAJO.
               </div>
             </div>
-            
+
             {/* Botón directo neón con bisel recortado por clipPath */}
             <a
               href="#membresias"
@@ -116,18 +116,19 @@ export default function Footer() {
             >
               ÚNETE HOY
             </a>
-          </div>
-        </div>
+          </div >
+        </div >
 
         {/* Fila inferior de Copyright con tipografía mono técnica */}
-        <div
+        < div
           className="pt-5 flex flex-col md:flex-row items-center justify-between gap-3"
           style={{
             borderTop: `1px solid ${R}12`,
             fontFamily: FM,
             fontSize: "0.7rem",
             color: "#3a3a3a",
-          }}
+          }
+          }
         >
           <span className="uppercase tracking-widest">
             © 2026 INGS GYM · Todos los derechos reservados
@@ -135,8 +136,8 @@ export default function Footer() {
           <span style={{ color: R }} className="uppercase tracking-widest">
             // BARRIO · GRIT · GRIND · GLORIA
           </span>
-        </div>
-      </div>
-    </footer>
+        </div >
+      </div >
+    </footer >
   );
 }
