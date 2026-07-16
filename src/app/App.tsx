@@ -13,6 +13,7 @@ import UserDashboard from "./pages/dashboard/UserDashboard";
 import ReceptionistDashboard from "./pages/dashboard/ReceptionistDashboard";
 import TrainerDashboard from "./pages/dashboard/TrainerDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import RutinasPage from "./pages/dashboard/RutinasPage";
 
 // Componente de protección de rutas
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -60,6 +61,16 @@ export default function App() {
               element={
                 <ProtectedRoute rolesPermitidos={["usuario"]}>
                   <UserDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Zona de rutinas personalizada (accesible por todos) */}
+            <Route
+              path="rutinas"
+              element={
+                <ProtectedRoute>
+                  <RutinasPage />
                 </ProtectedRoute>
               }
             />

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../firebase";
 import { R, O, FD, FB, FM, tg, bg } from "../components/common/styleConstants";
 
 /**
- * Página de inicio de sesión funcional.
- * Conecta con Firebase Auth a través del AuthContext.
- * Redirige según el rol del usuario y el flag de cambio de contraseña.
+ * Página de inicio de sesión funcional con soporte para recuperación de contraseña.
  */
 export default function LoginPage() {
   const { iniciarSesion } = useAuth();
@@ -16,6 +16,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
+  
+  // Estados para recuperación
+  const [modoRecuperar, setModoRecuperar] = useState(false);
+  const [exitoRecuperacion, setExitoRecuperacion] = useState("");
 
   // ── Mapeo de códigos de error de Firebase a español ───
 
@@ -32,7 +36,7 @@ export default function LoginPage() {
     return errores[code] || "Error al iniciar sesión. Intenta de nuevo.";
   }
 
-  // ── Submit ────────────────────────────────────────────
+  // ── Submit Login ──────────────────────────────────────
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,13 +46,11 @@ export default function LoginPage() {
     try {
       const datosUsuario = await iniciarSesion(email, password);
 
-      // Si requiere cambio de contraseña → redirigir al formulario obligatorio
       if (datosUsuario.requiereCambioContrasena) {
         navigate("/cambio-contrasena", { replace: true });
         return;
       }
 
-      // Redirigir al dashboard que corresponda según el rol
       const rutaPorRol: Record<string, string> = {
         usuario: "/dashboard/usuario",
         recepcionista: "/dashboard/recepcionista",
@@ -66,6 +68,25 @@ export default function LoginPage() {
     }
   }
 
+  // ── Submit Recuperación ───────────────────────────────
+
+  async function handleRecuperarContrasena(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setExitoRecuperacion("");
+    setCargando(true);
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setExitoRecuperacion("Se ha enviado un correo para restablecer tu contraseña. Revisa tu bandeja de entrada.");
+    } catch (err: any) {
+      console.error(err);
+      setError(traducirError(err.code || ""));
+    } finally {
+      setCargando(false);
+    }
+  }
+
   return (
     <div
       className="min-h-screen flex items-center justify-center relative px-5 overflow-hidden"
@@ -73,7 +94,7 @@ export default function LoginPage() {
         background: "#060606",
       }}
     >
-      {/* Elementos decorativos de fondo (luces de neón atenuadas) */}
+      {/* Elementos decorativos de fondo */}
       <div
         className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[150px] pointer-events-none opacity-20"
         style={{ background: R }}
@@ -83,7 +104,7 @@ export default function LoginPage() {
         style={{ background: O }}
       />
 
-      {/* Tarjeta de Login (Glassmorphism) */}
+      {/* Tarjeta de Login */}
       <div
         className="relative z-10 w-full max-w-md p-8 md:p-10 rounded-2xl border"
         style={{
@@ -107,14 +128,14 @@ export default function LoginPage() {
             className="text-xs uppercase tracking-widest text-gray-500"
             style={{ fontFamily: FM }}
           >
-            // Acceso de Usuarios y Personal
+            {modoRecuperar ? "// Recuperar Contraseña" : "// Acceso de Usuarios y Personal"}
           </p>
         </div>
 
-        {/* Mensaje de error */}
+        {/* Mensajes */}
         {error && (
           <div
-            className="mb-6 px-4 py-3 rounded-lg border text-sm"
+            className="mb-6 px-4 py-3 rounded-lg border text-sm animate-pulse"
             style={{
               background: `${R}10`,
               borderColor: `${R}40`,
@@ -126,74 +147,161 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Formulario */}
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label
-              className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-bold"
-              style={{ fontFamily: FB }}
-            >
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="nombre@ingsgym.com"
-              className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
-              style={{
-                background: "#121212",
-                borderColor: "#333",
-                color: "#fff",
-                fontFamily: FB,
-                fontSize: "1rem",
-              }}
-              required
-              disabled={cargando}
-            />
-          </div>
-
-          <div>
-            <label
-              className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-bold"
-              style={{ fontFamily: FB }}
-            >
-              Contraseña
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
-              style={{
-                background: "#121212",
-                borderColor: "#333",
-                color: "#fff",
-                fontFamily: FB,
-                fontSize: "1rem",
-              }}
-              required
-              disabled={cargando}
-            />
-          </div>
-
-          {/* Botón de Acceso */}
-          <button
-            type="submit"
-            disabled={cargando}
-            className="w-full py-3.5 text-base font-black uppercase tracking-widest text-center cursor-pointer transition-all hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+        {exitoRecuperacion && (
+          <div
+            className="mb-6 px-4 py-3 rounded-lg border border-emerald-900/50 bg-emerald-950/20 text-emerald-400 text-sm"
             style={{
-              fontFamily: FD,
-              background: R,
-              color: "#fff",
-              clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)",
-              ...bg(R, 0.75),
+              fontFamily: FB,
             }}
           >
-            {cargando ? "VERIFICANDO..." : "ENTRAR"}
-          </button>
-        </form>
+            {exitoRecuperacion}
+          </div>
+        )}
+
+        {/* Formulario de Inicio de Sesión */}
+        {!modoRecuperar ? (
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label
+                className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-bold"
+                style={{ fontFamily: FB }}
+              >
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nombre@ingsgym.com"
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
+                style={{
+                  background: "#121212",
+                  borderColor: "#333",
+                  color: "#fff",
+                  fontFamily: FB,
+                  fontSize: "1rem",
+                }}
+                required
+                disabled={cargando}
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label
+                  className="block text-xs uppercase tracking-wider text-gray-400 font-bold"
+                  style={{ fontFamily: FB }}
+                >
+                  Contraseña
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError("");
+                    setExitoRecuperacion("");
+                    setModoRecuperar(true);
+                  }}
+                  className="text-[10px] uppercase font-bold text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                  style={{ fontFamily: FM }}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
+                style={{
+                  background: "#121212",
+                  borderColor: "#333",
+                  color: "#fff",
+                  fontFamily: FB,
+                  fontSize: "1rem",
+                }}
+                required
+                disabled={cargando}
+              />
+            </div>
+
+            {/* Botón de Acceso */}
+            <button
+              type="submit"
+              disabled={cargando}
+              className="w-full py-3.5 text-base font-black uppercase tracking-widest text-center cursor-pointer transition-all hover:brightness-110 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                fontFamily: FD,
+                background: R,
+                color: "#fff",
+                clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)",
+                ...bg(R, 0.75),
+              }}
+            >
+              {cargando ? "VERIFICANDO..." : "ENTRAR"}
+            </button>
+          </form>
+        ) : (
+          /* Formulario de Recuperación */
+          <form className="space-y-6" onSubmit={handleRecuperarContrasena}>
+            <div>
+              <label
+                className="block text-xs uppercase tracking-wider text-gray-400 mb-2 font-bold"
+                style={{ fontFamily: FB }}
+              >
+                Ingresa tu correo para recuperar acceso
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nombre@ingsgym.com"
+                className="w-full px-4 py-3 rounded-lg border focus:outline-none transition-all"
+                style={{
+                  background: "#121212",
+                  borderColor: "#333",
+                  color: "#fff",
+                  fontFamily: FB,
+                  fontSize: "1rem",
+                }}
+                required
+                disabled={cargando}
+              />
+            </div>
+
+            {/* Botón de Enviar Enlace */}
+            <button
+              type="submit"
+              disabled={cargando}
+              className="w-full py-3.5 text-base font-black uppercase tracking-widest text-center cursor-pointer transition-all hover:brightness-110 active:scale-[0.99] disabled:opacity-50"
+              style={{
+                fontFamily: FD,
+                background: R,
+                color: "#fff",
+                clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)",
+                ...bg(R, 0.75),
+              }}
+            >
+              {cargando ? "ENVIANDO..." : "ENVIAR ENLACE"}
+            </button>
+
+            {/* Volver al login */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setError("");
+                  setExitoRecuperacion("");
+                  setModoRecuperar(false);
+                }}
+                className="text-xs uppercase font-bold text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                style={{ fontFamily: FM }}
+              >
+                ← Volver a iniciar sesión
+              </button>
+            </div>
+          </form>
+        )}
 
         {/* Enlace para volver a la Landing */}
         <div className="mt-8 text-center border-t border-gray-800 pt-6">

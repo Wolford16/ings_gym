@@ -136,7 +136,6 @@ export default function Navbar() {
           {/* Botón de unirse en el menú móvil */}
           <a
             href="#membresias"
-            className="text-base font-black uppercase tracking-widest px-6 py-3 text-center"
             className="text-base font-black uppercase tracking-widest px-6 py-3 text-center mb-2"
             style={{
               fontFamily: FD,
