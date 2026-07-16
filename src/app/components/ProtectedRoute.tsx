@@ -1,4 +1,4 @@
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
 import { R, FM } from "./common/styleConstants";
 
@@ -10,19 +10,13 @@ interface ProtectedRouteProps {
 
 /**
  * Componente wrapper que protege rutas del dashboard.
- *
- * Lógica de verificación:
- * 1. Si está cargando → muestra spinner
- * 2. Si no hay usuario autenticado → redirige a /login
- * 3. Si requiere cambio de contraseña → redirige a /cambio-contrasena
- * 4. Si el usuario no tiene el rol necesario → redirige a su dashboard correspondiente
- * 5. Si todo está bien → renderiza los children
  */
 export default function ProtectedRoute({
   children,
   rolesPermitidos,
 }: ProtectedRouteProps) {
   const { usuario, datosUsuario, cargando } = useAuth();
+  const location = useLocation();
 
   // Estado de carga: spinner minimalista al estilo INGS GYM
   if (cargando) {
@@ -55,8 +49,13 @@ export default function ProtectedRoute({
     return <Navigate to="/cambio-contrasena" replace />;
   }
 
-  // Si el usuario es de rol 'usuario' (cliente), no debe ver el Panel General u otros paneles
-  if (datosUsuario.rol === "usuario" && (!rolesPermitidos || !rolesPermitidos.includes("usuario"))) {
+  // Si el usuario es de rol 'usuario' (cliente), no debe ver el Panel General u otros paneles.
+  // Evitamos bucle infinito si ya está en la ruta del cliente o en rutinas.
+  if (
+    datosUsuario.rol === "usuario" &&
+    !location.pathname.endsWith("/dashboard/usuario") &&
+    !location.pathname.endsWith("/dashboard/rutinas")
+  ) {
     return <Navigate to="/dashboard/usuario" replace />;
   }
 
